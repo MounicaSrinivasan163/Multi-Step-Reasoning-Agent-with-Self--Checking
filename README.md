@@ -25,7 +25,7 @@ Supports easy extension to any LLM provider (OpenAI, Anthropic, Gemini, etc.).
    - Flags inconsistencies  
    - Supports retries  
 
-### ✅ Clean JSON Output  
+## ✅ Clean JSON Output  
 Example:
 ```json
 {
@@ -38,7 +38,7 @@ Example:
     "retries": 0
   }
 }
-
+```
 
 ## 📁 Project Structure
 
@@ -52,7 +52,10 @@ reasoning-agent/
 ├── tests/
 │   ├── easy_tests.py       # Basic arithmetic/time tests
 │   ├── tricky_tests.py     # Edge cases & ambiguous problems
-│# 🧩 Prompts
+
+```
+
+## 🧩 Prompts
 
 Prompts are stored in `prompts.py`:
 
