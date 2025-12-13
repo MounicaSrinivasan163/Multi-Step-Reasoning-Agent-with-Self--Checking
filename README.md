@@ -43,15 +43,24 @@ Example:
 ## 📁 Project Structure
 
 ```
-reasoning-agent/
+Mutli-Step-Reasoning-Agent-with-Self-Checking/
 │
-├── agent.py                # Main agent loop
-├── prompts.py              # Planner, executor, verifier prompts
-├── llm_client.py           # Wrapper for OpenAI/Gemini APIs
-├── solver.py               # Planner/Executor/Verifier orchestrator
-├── tests/
-│   ├── easy_tests.py       # Basic arithmetic/time tests
-│   ├── tricky_tests.py     # Edge cases & ambiguous problems
+├── agent/
+│   ├── graph.py
+│   ├── nodes.py
+│   └── graph_state.py
+│
+├── prompts/
+│   ├── planner_prompt.txt
+│   ├── executor_prompt.txt
+│   └── verifier_prompt.txt
+│
+├── solve.py
+│
+└── tests/
+    ├── easy_tests.py
+    └── tricky_tests.py
+
 
 ```
 
@@ -116,11 +125,7 @@ Test logs include:
 - Add streaming responses  
 - Improve handling of ambiguous time formats  
 
-├── README.md
-```
-
-
-
+---
 
 
 
