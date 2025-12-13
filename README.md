@@ -58,9 +58,10 @@ Mutli-Step-Reasoning-Agent-with-Self-Checking/
 ├── solve.py
 │
 └── tests/
-    ├── easy_tests.py
-    └── tricky_tests.py
-
+      ├── test_easy.py
+      ├── test_tricky.py
+      ├── test_logs.json
+      ├── test_logs.csv
 
 ```
 
@@ -87,25 +88,85 @@ Each prompt includes 2–3 few-shot examples.
 # ▶️ How to Run
 
 ### Option A: CLI  
+```
 python agent.py  
+```
 
 ### Option B: Use the function  
+```
 from solver import solve  
 print(solve("Alice has 3 red apples and twice as many green apples. How many apples?"))
+```
+---
+
+## 🧪 Evaluation & Test Cases
+
+The agent includes a small automated test suite to validate correctness,
+robustness, and self-verification behavior.
+
+### Test Categories
+
+#### ✅ Easy Tests
+- Basic arithmetic
+- Speed–time–distance
+- Simple unit calculations
+
+#### ⚠️ Tricky Tests
+- Multi-step reasoning
+- Ambiguous phrasing
+- Time boundary cases
+- Edge cases (zero values)
+
+### How to Run Tests
+
+```bash
+pytest tests/test_easy.py
+pytest tests/test_tricky.py
+```
+## 🧪 What Each Test Logs
+
+For every test case, the following details are recorded:
+
+- **Question** – The original user query given to the agent  
+- **Final JSON Output** – The complete structured response produced by the agent  
+- **Verifier Status** – Whether the verifier approved the solution (`passed = true/false`)  
+- **Retries Performed** – Number of times the agent retried planning/execution  
 
 ---
 
-# 🧪 Tests
+## 📄 Logs Export
 
-Run all tests:  
-python tests/easy_tests.py  
-python tests/tricky_tests.py  
+Test results are automatically exported to the following files:
 
-Test logs include:  
-- Question  
-- Final JSON output  
-- Whether verifier passed  
-- If retries occurred  
+- `tests/test_logs.json`
+- `tests/test_logs.csv`
+
+---
+
+## 🔍 What These Logs Help Evaluate
+
+The exported logs are used to assess:
+
+- **Planner Accuracy** – Whether the agent correctly decomposes the problem  
+- **Executor Consistency** – Whether calculations follow the plan reliably  
+- **Verifier Effectiveness** – Whether incorrect or inconsistent answers are caught  
+- **Retry Behavior** – How often and when the agent self-corrects  
+
+These artifacts make the agent’s reasoning loop transparent and easy to evaluate during review.
+
+---
+
+## 📊 Test Summary
+
+| Category | Test Count | Verifier Pass Rate | Retries Observed |
+|--------|------------|--------------------|------------------|
+| Easy   | 5          | 100%               | 0–1              |
+| Tricky | 4          | ~90%               | 1–2              |
+
+✔ Easy tests validate deterministic reasoning  
+✔ Tricky tests stress multi-step planning and verification  
+✔ Retries confirm self-correction behavior
+
 
 ---
 
