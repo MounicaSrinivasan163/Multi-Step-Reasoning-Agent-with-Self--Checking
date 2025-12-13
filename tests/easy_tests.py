@@ -1,33 +1,40 @@
-from solve import solve
 import json
+from solve import solve
 
-easy_questions = [
-    "If I travel at 60 km/hr for 2 hours, what distance do I cover?",
-    "A train moves at 40 km/hr for 3 hours. Find the distance.",
-    "A car travels 50 km/hr for 4 hours. How far does it go?",
-    "A person walks 5 km/hr for 6 hours. What distance is covered?",
-    "A cyclist rides at 20 km/hr for 1.5 hours. What is the distance?",
-    "How long will it take to travel 120 km at 60 km/hr?",
-    "What is the speed if 150 km is covered in 3 hours?"
-]
+def test_easy_questions():
 
-print("\n🧪 RUNNING EASY TESTS")
-print("=" * 60)
+    easy_questions = [
+        "If I travel at 60 km/hr for 2 hours, what distance do I cover?",
+        "A train moves at 40 km/hr for 3 hours. Find the distance.",
+        "A car travels 50 km/hr for 4 hours. How far does it go?",
+        "A person walks 5 km/hr for 6 hours. What distance is covered?",
+        "How long will it take to travel 120 km at 60 km/hr?"
+    ]
 
-for idx, question in enumerate(easy_questions, start=1):
-    print(f"\nTest Case {idx}")
-    print("-" * 40)
-    print("Question:", question)
+    logs = []
 
-    result = solve(question)
+    for question in easy_questions:
+        result = solve(question)
 
-    print("\nFinal JSON:")
-    print(json.dumps(result, indent=2))
+        # ✅ Assertions
+        assert result["status"] == "success"
+        assert "answer" in result
+        assert "metadata" in result
 
-    checks = result.get("metadata", {}).get("checks", [])
-    verifier_passed = checks[-1]["passed"] if checks else False
-    retries = result.get("metadata", {}).get("retries", 0)
+        verifier_passed = result["metadata"]["checks"][-1]["passed"]
+        retries = result["metadata"]["retries"]
 
-    print("\nVerifier Passed:", verifier_passed)
-    print("Retries Occurred:", retries)
-    print("=" * 60)
+        assert verifier_passed is True
+        assert retries >= 0
+
+        logs.append({
+            "question": question,
+            "status": result["status"],
+            "answer": result["answer"],
+            "verifier_passed": verifier_passed,
+            "retries": retries
+        })
+
+    # Save logs
+    with open("tests/test_logs.json", "w") as f:
+        json.dump(logs, f, indent=2)
