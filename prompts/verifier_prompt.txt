@@ -19,3 +19,4 @@ Rules:
 - If mismatch → passed:false and explain briefly.
 - Keep reasoning short (NO chain-of-thought).
 - If correct → passed:true with a short confirmation.
+
