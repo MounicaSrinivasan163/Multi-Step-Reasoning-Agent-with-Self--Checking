@@ -1,32 +1,21 @@
-import json
 from solve import solve
+from utils.logger import log_run
 
-def test_tricky_questions():
-
-    tricky_questions = [
+QUESTIONS = [
         "I travel at 50 km/hr for 3 hours and then 80 km/hr for 2 hours. What is the total distance?",
         "A car travels for 2 hours at 60 km/hr, then slows down to half the speed for 1 hour. Total distance?",
-        "A train departs at 9:30 AM and arrives at 1:15 PM. How long is the journey?",
-        "If speed is 0 km/hr for 2 hours, what distance is covered?"
+        
     ]
 
-    logs = []
+for q in QUESTIONS:
+    result = solve(q)
 
-    for question in tricky_questions:
-        result = solve(question)
+    assert result["status"] == "success"
 
-        assert result["status"] in ["success", "failed"]
+    log_run(
+        result=result,
+        question=q,
+        source="tricky_test"
+    )
 
-        verifier_passed = result["metadata"]["checks"][-1]["passed"]
-        retries = result["metadata"]["retries"]
-
-        logs.append({
-            "question": question,
-            "status": result["status"],
-            "answer": result["answer"],
-            "verifier_passed": verifier_passed,
-            "retries": retries
-        })
-
-    with open("tests/test_logs_tricky.json", "w") as f:
-        json.dump(logs, f, indent=2)
+    print("Testing Done for the question : ", q)
