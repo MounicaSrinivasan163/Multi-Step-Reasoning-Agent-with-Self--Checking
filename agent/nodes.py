@@ -1,7 +1,18 @@
 import json
+import os
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from langgraph.graph import StateGraph
 from .graph_state import GraphState
+
+# Load .env file
+load_dotenv()
+
+# Read OPENAI_API_KEY
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError(
+        "❌ OPENAI_API_KEY not found. Create a .env file or set environment variable."
+    )
 
 # Load prompts
 def load_prompt(path):
@@ -12,7 +23,9 @@ planner_prompt = load_prompt("prompts/planner_prompt.txt")
 executor_prompt = load_prompt("prompts/executor_prompt.txt")
 verifier_prompt = load_prompt("prompts/verifier_prompt.txt")
 
-llm = ChatOpenAI(model="gpt-4.1", temperature=0)
+# Initialize LLM with API key
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
+
 
 # ⬇️ Planner Node
 def planner_node(state: GraphState):
@@ -58,15 +71,31 @@ Proposed Solution:
 
 # ⬇️ Retry Logic Node
 def check_verification(state: GraphState):
-    if state.verification.get("passed"):
-        state.status = "success"
-        return "done"
+    passed = state.verification.get("passed", False)
 
-    # If failed but retries remain
+    state.checks.append({
+        "check_name": "verification_passed",
+        "passed": passed,
+        "details": state.verification.get("message", "")
+    })
+
+    if passed:
+        state.status = "success"
+        return state
+
     if state.retries < 2:
         state.retries += 1
-        return "retry"
+        state.status = "retry"
+        return state
 
-    # If failed and retries exhausted
     state.status = "failed"
-    return "done"
+    return state
+
+
+
+
+
+# ⬇️ Terminal Node
+def end_node(state: GraphState):
+    # Terminal node just returns the state
+    return state
