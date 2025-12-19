@@ -339,12 +339,20 @@ Pipes A and B can fill a tank in 20 and 30 hours respectively, while Pipe C empt
 If all three are opened together, how long will it take to fill the tank?
 
 **Correct Solution:**  
-\[
-\frac{1}{20} + \frac{1}{30} - \frac{1}{60}
-= \frac{4}{60}
-= \frac{1}{15}
-\Rightarrow 15 \text{ hours}
-\]
+```
+Correct Solution:
+
+Net filling rate =
+1/20 + 1/30 − 1/60
+
+LCM = 60
+
+= 3/60 + 2/60 − 1/60
+= 4/60
+= 1/15
+
+So, time required = 15 hours
+```
 
 **Agent Output:**  
 24 hours ❌
