@@ -358,6 +358,7 @@ So, time required = 15 hours
 24 hours ❌
 
 #### What Went Wrong
+
 - The **Executor** incorrectly combined rate fractions
 - The **Verifier** validated the same flawed reasoning
 - No deterministic check existed to enforce correct rate arithmetic
@@ -394,6 +395,7 @@ This illustrates a core limitation:
 
 This architecture intentionally exposes LLM weaknesses rather than hiding them, making reasoning failures transparent and correctable.  
 Future versions will combine LLM reasoning with deterministic computation for mathematical reliability.
+
 ---
 
 ## ⚠️ Rate-Limit Notes
