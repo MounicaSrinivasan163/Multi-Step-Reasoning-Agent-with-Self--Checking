@@ -1,0 +1,23 @@
+# Core Python utilities
+python-dotenv>=1.0.0
+
+# LangChain + LangGraph (PINNED to avoid breaking changes)
+langchain>=0.2.14,<0.3.0
+langchain-core>=0.2.38,<0.3.0
+langchain-openai>=0.1.17,<0.2.0
+langgraph>=0.2.35,<0.3.0
+
+# OpenAI SDK (new API)
+openai>=1.30.0,<2.0.0
+
+# UI
+streamlit>=1.32.0
+
+# Data & logging
+pandas>=2.0.0
+
+# Testing
+pytest>=7.4.0
+
+# Optional (CSV/JSON helpers, safety)
+tqdm>=4.66.0
