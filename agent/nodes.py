@@ -24,7 +24,7 @@ executor_prompt = load_prompt("prompts/executor_prompt.txt")
 verifier_prompt = load_prompt("prompts/verifier_prompt.txt")
 
 # Initialize LLM with API key
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0, api_key=OPENAI_API_KEY)
 
 
 # ⬇️ Planner Node
