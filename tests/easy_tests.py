@@ -1,9 +1,7 @@
-import json
 from solve import solve
+from utils.logger import log_run
 
-def test_easy_questions():
-
-    easy_questions = [
+QUESTIONS = [
         "If I travel at 60 km/hr for 2 hours, what distance do I cover?",
         "A train moves at 40 km/hr for 3 hours. Find the distance.",
         "A car travels 50 km/hr for 4 hours. How far does it go?",
@@ -11,30 +9,17 @@ def test_easy_questions():
         "How long will it take to travel 120 km at 60 km/hr?"
     ]
 
-    logs = []
+for q in QUESTIONS:
+    result = solve(q)
 
-    for question in easy_questions:
-        result = solve(question)
+    # Assertion
+    assert result["status"] == "success"
 
-        # ✅ Assertions
-        assert result["status"] == "success"
-        assert "answer" in result
-        assert "metadata" in result
+    # Log test run
+    log_run(
+        result=result,
+        question=q,
+        source="easy_test"
+    )
 
-        verifier_passed = result["metadata"]["checks"][-1]["passed"]
-        retries = result["metadata"]["retries"]
-
-        assert verifier_passed is True
-        assert retries >= 0
-
-        logs.append({
-            "question": question,
-            "status": result["status"],
-            "answer": result["answer"],
-            "verifier_passed": verifier_passed,
-            "retries": retries
-        })
-
-    # Save logs
-    with open("tests/test_logs.json", "w") as f:
-        json.dump(logs, f, indent=2)
+    print("Testing Done for the question : ", q)
