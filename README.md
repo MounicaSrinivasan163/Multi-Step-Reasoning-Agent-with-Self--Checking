@@ -195,6 +195,125 @@ Using print_summary.py, the system computes:
 - Failure patterns
 
 ---
+## 🧠 Prompt Design & Rationale
+
+This project uses **role-specific prompts** for each agent stage (Planner, Executor, Verifier) to enforce separation of concerns and improve reasoning reliability.
+
+---
+
+### 🔹 Why the Prompts Were Designed This Way
+
+#### **1. Planner Prompt**
+**Goal:** Convert a natural language question into a deterministic, structured plan.
+
+**Design choices:**
+- Forces numbered, sequential steps
+- Avoids computation or reasoning
+- Produces JSON-friendly output
+
+**Why this works:**
+- Prevents early arithmetic mistakes
+- Makes multi-step problems explicit
+- Enables retries by re-planning instead of guessing
+
+**Example responsibilities:**
+- Identify inputs (numbers, units, times)
+- Decide computation order
+- Specify transformations (sum, difference, conversion)
+
+---
+
+#### **2. Executor Prompt**
+**Goal:** Execute the plan *exactly as written* and produce a machine-checkable result.
+
+**Design choices:**
+- Strict JSON schema (intermediate_result + steps)
+- One factual line per step
+- No free-form explanation or verification
+
+**Why this works:**
+- Keeps execution deterministic
+- Makes debugging and testing easy
+- Allows verifier to independently recompute results
+
+**Executor never:**
+- Fixes planner mistakes
+- Verifies correctness
+- Adds assumptions silently
+
+---
+
+#### **3. Verifier Prompt**
+**Goal:** Independently validate the executor’s result.
+
+**Design choices:**
+- Recomputes from scratch
+- Outputs pass/fail + short summary
+- No chain-of-thought exposure
+
+**Why this works:**
+- Catches arithmetic slips
+- Detects plan/execution mismatch
+- Enables controlled retries without infinite loops
+
+---
+
+### ⚠️ What Didn’t Work Well Initially
+
+1. **Single-prompt reasoning**
+   - Mixing planning, execution, and verification caused hallucinations
+   - Difficult to debug or retry
+
+2. **Free-form Executor output**
+   - Inconsistent formats broke tests
+   - Verifier could not reliably parse results
+
+3. **Verbose chain-of-thought**
+   - Caused token overuse
+   - Reduced determinism
+   - Violated safe-output constraints
+
+4. **Implicit assumptions**
+   - Ambiguous inputs (time ranges, units) caused silent errors
+   - Fixed by forcing explicit assumptions into metadata
+
+---
+
+### 🚀 What I Would Improve With More Time
+
+1. **Prompt caching**
+   - Cache Planner outputs for repeated or similar questions
+   - Reduce token usage and rate-limit issues
+
+2. **Stronger Verifier heuristics**
+   - Add multiple independent checks (units, bounds, sanity checks)
+   - Score confidence instead of binary pass/fail
+
+3. **Executor fallback logic**
+   - Use pure Python for arithmetic-only plans
+   - Call LLM only when interpretation is required
+
+4. **Adaptive retry strategy**
+   - Change prompts dynamically after repeated failures
+   - Example: simplify plan or reduce step count
+
+5. **Benchmark-driven prompt tuning**
+   - Optimize prompts based on test pass rate
+   - Track failure modes across easy vs tricky cases
+
+---
+
+### ✅ Outcome
+
+This prompt design achieves:
+- **High determinism**
+- **Clear auditability**
+- **Reliable self-correction**
+- **Clean JSON outputs suitable for evaluation**
+
+It balances LLM flexibility with strong structural constraints, making the system suitable for both **interactive use** and **automated testing**.
+
+---
 
 ## ⚠️ Rate-Limit Notes
 
