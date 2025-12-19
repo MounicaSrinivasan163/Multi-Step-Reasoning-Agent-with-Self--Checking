@@ -1,4 +1,5 @@
 # 🧠 Multi-Step Reasoning Agent with Self-Checking
+
 ---
 Streamlit app link: https://multi-step-reasoning-agent-with-self-checking.streamlit.app/
 ---
@@ -42,7 +43,7 @@ Designed for structured word problems such as arithmetic, time, and multi-step r
 
 ---
 
-## ✅ Contract-Compliant JSON Output
+## ✅ Expected JSON Output
 
 Example response:
 ```
@@ -107,6 +108,7 @@ MultiStep_Reasoning/
 ## 🖥️ How to Run the Application
 
 Start the Streamlit App:
+
 ```
 streamlit run app.py
 ```
@@ -141,6 +143,7 @@ Run all tests:
 python run_tests.py
 
 Run individually:
+
 ```
 python -m tests.easy_tests  
 python -m tests.tricky_tests  
@@ -164,7 +167,6 @@ All runs (tests + app usage) are automatically logged to:
 
 - logs/run_logs.csv  
  
-
 ---
 
 ## 🔍 What the Logs Help Evaluate
