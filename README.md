@@ -314,6 +314,79 @@ This prompt design achieves:
 It balances LLM flexibility with strong structural constraints, making the system suitable for both **interactive use** and **automated testing**.
 
 ---
+## ⚠️ Current Architecture Challenges & Future Improvements
+
+### General Challenges in the Current Architecture
+
+1. **LLM-based Arithmetic Is Non-Deterministic**  
+   While LLMs are strong at reasoning and explanation, they are unreliable for precise mathematical computation, especially with fractions, rates, and sign-sensitive problems.
+
+2. **Verifier Is Not Truly Independent**  
+   The Verifier uses the same LLM paradigm as the Executor, which can cause it to repeat the same incorrect reasoning instead of catching errors.
+
+3. **Lack of Formula Enforcement**  
+   Mathematical domains (rates, mensuration, time–work) require strict formula application, which the current architecture does not enforce programmatically.
+
+4. **Retries Don’t Guarantee Correction**  
+   When the core reasoning pattern is flawed, retries may only restate the same mistake in different wording.
+
+---
+
+### Example: Pipes & Cisterns Failure
+
+**Question:**  
+Pipes A and B can fill a tank in 20 and 30 hours respectively, while Pipe C empties it in 60 hours.  
+If all three are opened together, how long will it take to fill the tank?
+
+**Correct Solution:**  
+\[
+\frac{1}{20} + \frac{1}{30} - \frac{1}{60}
+= \frac{4}{60}
+= \frac{1}{15}
+\Rightarrow 15 \text{ hours}
+\]
+
+**Agent Output:**  
+24 hours ❌
+
+#### What Went Wrong
+- The **Executor** incorrectly combined rate fractions
+- The **Verifier** validated the same flawed reasoning
+- No deterministic check existed to enforce correct rate arithmetic
+
+This illustrates a core limitation:  
+> LLMs can describe math convincingly while still producing incorrect results.
+
+---
+
+### How This Can Be Improved in the Future
+
+1. **Hybrid Execution Layer**
+   - Delegate all numeric computation to Python functions
+   - Use the LLM only for planning and explanation
+
+2. **Deterministic Verification**
+   - Recompute results using formulas instead of natural language
+   - Reject answers that don’t match computed values
+
+3. **Domain-Aware Executors**
+   - Special handlers for:
+     - Pipes & Cisterns
+     - Time & Work
+     - Mensuration
+     - Speed–Distance–Time
+
+4. **Smarter Retry Strategy**
+   - On failure, switch execution mode (LLM → deterministic)
+   - Avoid repeating identical reasoning paths
+
+---
+
+### Key Takeaway
+
+This architecture intentionally exposes LLM weaknesses rather than hiding them, making reasoning failures transparent and correctable.  
+Future versions will combine LLM reasoning with deterministic computation for mathematical reliability.
+---
 
 ## ⚠️ Rate-Limit Notes
 
