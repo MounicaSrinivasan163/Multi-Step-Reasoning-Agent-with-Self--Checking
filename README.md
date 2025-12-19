@@ -258,77 +258,65 @@ This project uses **role-specific prompts** for each agent stage (Planner, Execu
 
 ---
 
-### ⚠️ What Didn’t Work Well Initially
+## ⚠️ Current Limitations & Future Improvements
 
-1. **Single-prompt reasoning**
-   - Mixing planning, execution, and verification caused hallucinations
-   - Difficult to debug or retry
+### What Didn’t Work Well Initially
 
-2. **Free-form Executor output**
-   - Inconsistent formats broke tests
-   - Verifier could not reliably parse results
+1. **Single-Prompt Reasoning**
+   - Combining planning, execution, and verification in one prompt led to hallucinations.
+   - Failures were hard to debug, and retries often repeated the same mistake.
 
-3. **Verbose chain-of-thought**
-   - Caused token overuse
-   - Reduced determinism
-   - Violated safe-output constraints
+2. **Free-Form Executor Output**
+   - Inconsistent response formats caused parsing and test failures.
+   - The verifier could not reliably extract or validate results.
 
-4. **Implicit assumptions**
-   - Ambiguous inputs (time ranges, units) caused silent errors
-   - Fixed by forcing explicit assumptions into metadata
+3. **Verbose Chain-of-Thought**
+   - Increased token usage and reduced determinism.
+   - Risked violating safe-output and evaluation constraints.
 
----
-
-### 🚀 What I Would Improve With More Time
-
-1. **Prompt caching**
-   - Cache Planner outputs for repeated or similar questions
-   - Reduce token usage and rate-limit issues
-
-2. **Stronger Verifier heuristics**
-   - Add multiple independent checks (units, bounds, sanity checks)
-   - Score confidence instead of binary pass/fail
-
-3. **Executor fallback logic**
-   - Use pure Python for arithmetic-only plans
-   - Call LLM only when interpretation is required
-
-4. **Adaptive retry strategy**
-   - Change prompts dynamically after repeated failures
-   - Example: simplify plan or reduce step count
-
-5. **Benchmark-driven prompt tuning**
-   - Optimize prompts based on test pass rate
-   - Track failure modes across easy vs tricky cases
+4. **Implicit Assumptions**
+   - Ambiguous inputs (units, time ranges, directions) caused silent errors.
+   - Partially mitigated by forcing explicit assumptions into structured metadata.
 
 ---
 
-### ✅ Outcome
+### What I Would Improve With More Time
 
-This prompt design achieves:
-- **High determinism**
-- **Clear auditability**
-- **Reliable self-correction**
-- **Clean JSON outputs suitable for evaluation**
+1. **Prompt Caching**
+   - Cache Planner outputs for repeated or similar questions.
+   - Reduce token usage and rate-limit pressure.
 
-It balances LLM flexibility with strong structural constraints, making the system suitable for both **interactive use** and **automated testing**.
+2. **Stronger Verifier Heuristics**
+   - Add multiple independent checks (units, bounds, sanity checks).
+   - Move from binary pass/fail to confidence scoring.
+
+3. **Executor Fallback Logic**
+   - Use pure Python for arithmetic-only plans.
+   - Invoke the LLM only when interpretation or decomposition is required.
+
+4. **Adaptive Retry Strategy**
+   - Dynamically modify prompts after repeated failures.
+   - Example: simplify plans, reduce step count, or switch execution mode.
+
+5. **Benchmark-Driven Prompt Tuning**
+   - Continuously tune prompts based on test pass rates.
+   - Track and analyze failure modes across easy vs. tricky cases.
 
 ---
-## ⚠️ Current Architecture Challenges & Future Improvements
 
-### General Challenges in the Current Architecture
+### Current Architecture Challenges
 
-1. **LLM-based Arithmetic Is Non-Deterministic**  
-   While LLMs are strong at reasoning and explanation, they are unreliable for precise mathematical computation, especially with fractions, rates, and sign-sensitive problems.
+1. **LLM-Based Arithmetic Is Non-Deterministic**  
+   LLMs are strong at explanation but unreliable for precise computation, especially with fractions, rates, and sign-sensitive problems.
 
-2. **Verifier Is Not Truly Independent**  
-   The Verifier uses the same LLM paradigm as the Executor, which can cause it to repeat the same incorrect reasoning instead of catching errors.
+2. **Verifier Is Not Fully Independent**  
+   Using the same LLM paradigm for execution and verification can replicate the same flawed reasoning instead of catching it.
 
 3. **Lack of Formula Enforcement**  
-   Mathematical domains (rates, mensuration, time–work) require strict formula application, which the current architecture does not enforce programmatically.
+   Mathematical domains (pipes & cisterns, time–work, mensuration) require strict formula application, which is not enforced programmatically.
 
 4. **Retries Don’t Guarantee Correction**  
-   When the core reasoning pattern is flawed, retries may only restate the same mistake in different wording.
+   When the underlying reasoning pattern is wrong, retries may only restate the same error.
 
 ---
 
@@ -338,7 +326,8 @@ It balances LLM flexibility with strong structural constraints, making the syste
 Pipes A and B can fill a tank in 20 and 30 hours respectively, while Pipe C empties it in 60 hours.  
 If all three are opened together, how long will it take to fill the tank?
 
-**Correct Solution:**  
+**Correct Solution:**
+  
 ```
 Correct Solution:
 
@@ -357,44 +346,44 @@ So, time required = 15 hours
 **Agent Output:**  
 24 hours ❌
 
-#### What Went Wrong
+**What Went Wrong**
+- The Executor incorrectly combined rate fractions.
+- The Verifier validated the same flawed reasoning.
+- No deterministic, formula-based check enforced correct arithmetic.
 
-- The **Executor** incorrectly combined rate fractions
-- The **Verifier** validated the same flawed reasoning
-- No deterministic check existed to enforce correct rate arithmetic
-
-This illustrates a core limitation:  
-> LLMs can describe math convincingly while still producing incorrect results.
+This highlights a core limitation:
+> LLMs can produce convincing explanations while still being numerically wrong.
 
 ---
 
-### How This Can Be Improved in the Future
+### How This Will Be Improved
 
 1. **Hybrid Execution Layer**
-   - Delegate all numeric computation to Python functions
-   - Use the LLM only for planning and explanation
+   - Delegate all numeric computation to deterministic Python functions.
+   - Use the LLM only for planning and explanation.
 
 2. **Deterministic Verification**
-   - Recompute results using formulas instead of natural language
-   - Reject answers that don’t match computed values
+   - Recompute results using formulas, not natural language.
+   - Reject outputs that don’t match computed values.
 
 3. **Domain-Aware Executors**
-   - Special handlers for:
+   - Introduce specialized handlers for:
      - Pipes & Cisterns
      - Time & Work
      - Mensuration
      - Speed–Distance–Time
 
 4. **Smarter Retry Strategy**
-   - On failure, switch execution mode (LLM → deterministic)
-   - Avoid repeating identical reasoning paths
+   - Switch execution modes on failure (LLM → deterministic).
+   - Avoid repeating identical reasoning paths.
 
 ---
 
 ### Key Takeaway
 
-This architecture intentionally exposes LLM weaknesses rather than hiding them, making reasoning failures transparent and correctable.  
-Future versions will combine LLM reasoning with deterministic computation for mathematical reliability.
+This architecture deliberately **exposes LLM weaknesses instead of hiding them**, making reasoning failures transparent and auditable.  
+Future iterations will combine LLM-based planning with deterministic computation and verification to achieve mathematical reliability while preserving interpretability.
+
 
 ---
 
