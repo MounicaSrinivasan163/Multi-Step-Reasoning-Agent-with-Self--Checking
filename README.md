@@ -1,198 +1,223 @@
-# 🧠 Multi-Step Reasoning Agent with Self-Checking  
-A lightweight reasoning agent that solves structured word problems using **Planner → Executor → Verifier** architecture.  
-It provides a clean JSON output with a user-facing answer and internal metadata (plan, checks, retries).  
-Supports easy extension to any LLM provider (OpenAI, Anthropic, Gemini, etc.).
+# 🧠 Multi-Step Reasoning Agent with Self-Checking
+---
+Streamlit app link: https://multi-step-reasoning-agent-with-self-checking.streamlit.app/
+---
+
+A lightweight multi-step reasoning agent built using a **Planner → Executor → Verifier** architecture with automatic retries, logging, and evaluation.
+
+The system produces:
+- A clean, user-facing answer
+- A machine-friendly JSON output
+- Internal metadata (plan, checks, retries)
+- Persistent logs (CSV / JSON) for evaluation
+
+Designed for structured word problems such as arithmetic, time, and multi-step reasoning tasks.
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-### ✅ Multi-Phase Agent  
-1. **Planner**  
-   - Reads question  
-   - Generates structured plan  
-   - Example: parse → extract values → compute → format  
+### 🧩 Multi-Phase Reasoning Pipeline
 
-2. **Executor**  
-   - Executes plan  
-   - Uses Python for calculations  
-   - Runs LLM if required  
-   - Stores intermediate results  
+1. Planner  
+   - Reads the question  
+   - Produces a structured step-by-step plan  
+   - Output is JSON-friendly and deterministic  
 
-3. **Verifier**  
-   - Independently verifies answer  
-   - Recomputes / validates constraints  
-   - Flags inconsistencies  
-   - Supports retries  
+2. Executor  
+   - Executes the plan exactly  
+   - Performs calculations  
+   - Returns intermediate_result and factual step records  
+   - No chain-of-thought exposed  
 
-## ✅ Clean JSON Output  
-Example:
-```json
+3. Verifier  
+   - Independently validates executor output  
+   - Recomputes results  
+   - Flags incorrect reasoning  
+   - Triggers retries if needed  
+
+4. Retry Controller  
+   - Automatically retries up to a fixed limit  
+   - Tracks retry count for evaluation  
+
+---
+
+## ✅ Contract-Compliant JSON Output
+
+Example response:
+```
 {
-  "answer": "3 hours 35 minutes",
+  "answer": 350,
   "status": "success",
-  "reasoning_visible_to_user": "Calculated time difference between 14:30 and 18:05.",
+  "reasoning_visible_to_user": "I solved this by planning, executing, and verifying the result.",
   "metadata": {
-    "plan": "...",
-    "checks": [...],
+    "plan": {
+      "steps": [
+        "Calculate distance at 50 km/hr for 3 hours",
+        "Calculate distance at 80 km/hr for 2 hours",
+        "Sum both distances"
+      ]
+    },
+    "checks": [
+      {
+        "check_name": "verification_passed",
+        "passed": true,
+        "details": ""
+      }
+    ],
     "retries": 0
   }
 }
 ```
+---
 
 ## 📁 Project Structure
-
 ```
-Mutli-Step-Reasoning-Agent-with-Self-Checking/
+MultiStep_Reasoning/
 │
 ├── agent/
-│   ├── graph.py
-│   ├── nodes.py
-│   └── graph_state.py
+│   ├── graph.py              # LangGraph definition
+│   ├── nodes.py              # Planner / Executor / Verifier nodes
+│   └── graph_state.py        # State schema
 │
 ├── prompts/
 │   ├── planner_prompt.txt
 │   ├── executor_prompt.txt
 │   └── verifier_prompt.txt
 │
-├── solve.py
+├── solve.py                  # Core solve() API
+├── app.py                    # Streamlit UI
 │
-└── tests/
-      ├── test_easy.py
-      ├── test_tricky.py
-      ├── test_logs.json
-      ├── test_logs.csv
-
-```
-
-## 🧩 Prompts
-
-Prompts are stored in `prompts.py`:
-
-## 1. Planner Prompt
-- Generates numbered steps  
-- Output must be JSON-friendly  
-
-## 2. Executor Prompt
-- Follows plan exactly  
-- Returns intermediate calculations  
-
-## 3. Verifier Prompt
-- Re-computes result  
-- Returns pass/fail + explanation  
-
-Each prompt includes 2–3 few-shot examples.
-
----
-
-# ▶️ How to Run
-
-### Option A: CLI  
-```
-python agent.py  
-```
-
-### Option B: Use the function  
-```
-from solver import solve  
-print(solve("Alice has 3 red apples and twice as many green apples. How many apples?"))
+├── tests/
+│   ├── easy_tests.py
+│   ├── tricky_tests.py
+│
+├── utils/
+│   └── logger.py             # CSV / JSON logger
+│
+├── logs/
+│   ├── run_logs.csv
+│   
+│
+├── run_tests.py              # Test runner
+└── print_summary.py          # Test analytics
 ```
 ---
 
-## 🧪 Evaluation & Test Cases
+## 🖥️ How to Run the Application
 
-The agent includes a small automated test suite to validate correctness,
-robustness, and self-verification behavior.
+Start the Streamlit App:
+```
+streamlit run app.py
+```
+- Enter a question
+- View final answer, explanation, retries, verifier checks, and raw JSON output
+
+---
+
+## 🧪 Evaluation & Test Suite
+
+The project includes a custom test framework to evaluate reasoning quality and robustness.
 
 ### Test Categories
 
-#### ✅ Easy Tests
+Easy Tests:
 - Basic arithmetic
-- Speed–time–distance
-- Simple unit calculations
+- Speed × time × distance
+- Simple time differences
 
-#### ⚠️ Tricky Tests
+Tricky Tests:
 - Multi-step reasoning
 - Ambiguous phrasing
 - Time boundary cases
-- Edge cases (zero values)
+- Edge conditions
 
-### How to Run Tests
+---
 
-```bash
-pytest tests/test_easy.py
-pytest tests/test_tricky.py
+## ▶️ How to Run Tests
+
+Run all tests:
+
+python run_tests.py
+
+Run individually:
 ```
+python -m tests.easy_tests  
+python -m tests.tricky_tests  
+```
+---
+
 ## 🧪 What Each Test Logs
 
-For every test case, the following details are recorded:
+For every test case, the following are recorded:
 
-- **Question** – The original user query given to the agent  
-- **Final JSON Output** – The complete structured response produced by the agent  
-- **Verifier Status** – Whether the verifier approved the solution (`passed = true/false`)  
-- **Retries Performed** – Number of times the agent retried planning/execution  
+- Question  
+- Final JSON output  
+- Whether the verifier passed  
+- Number of retries performed  
 
 ---
 
 ## 📄 Logs Export
 
-Test results are automatically exported to the following files:
+All runs (tests + app usage) are automatically logged to:
 
-- `tests/test_logs.json`
-- `tests/test_logs.csv`
-
----
-
-## 🔍 What These Logs Help Evaluate
-
-The exported logs are used to assess:
-
-- **Planner Accuracy** – Whether the agent correctly decomposes the problem  
-- **Executor Consistency** – Whether calculations follow the plan reliably  
-- **Verifier Effectiveness** – Whether incorrect or inconsistent answers are caught  
-- **Retry Behavior** – How often and when the agent self-corrects  
-
-These artifacts make the agent’s reasoning loop transparent and easy to evaluate during review.
+- logs/run_logs.csv  
+ 
 
 ---
 
-## 📊 Test Summary
+## 🔍 What the Logs Help Evaluate
 
-| Category | Test Count | Verifier Pass Rate | Retries Observed |
-|--------|------------|--------------------|------------------|
-| Easy   | 5          | 100%               | 0–1              |
-| Tricky | 4          | ~90%               | 1–2              |
-
-✔ Easy tests validate deterministic reasoning  
-✔ Tricky tests stress multi-step planning and verification  
-✔ Retries confirm self-correction behavior
-
+- Planner accuracy  
+- Executor consistency  
+- Verifier effectiveness  
+- Retry behavior  
 
 ---
 
-# 📚 Prompt Design Notes
+## 📊 Auto-Generated Test Summary
 
-## What Worked
-- Separating plan generation improves determinism  
-- Executor runs cleanly with Python arithmetic  
-- Verifier catches inconsistent LLM reasoning  
-
-## What Didn’t Work Initially
-- Allowing executor to interpret the plan caused drift  
-- Verifier needed strict JSON format to avoid false failures  
-
-## Future Improvements
-- Add caching to avoid repeated planner calls  
-- Add streaming responses  
-- Improve handling of ambiguous time formats  
+Category | Test Count | Verifier Pass Rate | Retries Observed  
+Easy     | 5–10       | ~100%              | 0–1  
+Tricky  | 3–5        | ~85–90%            | 1–2  
 
 ---
 
+## 📈 Retry & Quality Metrics
 
+Using print_summary.py, the system computes:
+- Retry rate
+- Average retries per question
+- Planner / Executor quality indicators
+- Failure patterns
 
+---
 
+## ⚠️ Rate-Limit Notes
 
+- Running many tests consumes LLM tokens  
+- For testing: use smaller models  
+- For demo / production: use gpt-4o-mini  
 
+---
 
+## 🚧 Future Improvements
 
+- Local math executor (no LLM for arithmetic)
+- Caching planner outputs
+- Parallel verifier strategies
+- Streaming UI responses
+- Confidence scoring
+
+---
+
+## ✅ Summary
+
+- Clean architecture  
+- Deterministic execution  
+- Self-verification  
+- Retry logic  
+- Full evaluation framework  
+- Production-ready logging  
 
