@@ -127,15 +127,18 @@ Output format:
     except Exception:
         verifier_answer = None
 
-    def extract_number(x):
-    try:
-        return float(x)
-    except:
-        import re
-        nums = re.findall(r"\d+\.?\d*", str(x))
-        return float(nums[0]) if nums else None
+    import re
 
-    agreement = extract_number(verifier_answer) == extract_number(result)
+    def normalize_numeric_answer(x):
+        if x is None:
+            return None
+        if isinstance(x, (int, float)):
+            return float(x)
+        matches = re.findall(r"\d+\.?\d*", str(x))
+        return float(matches[0]) if matches else None
+
+    agreement = normalize_numeric_answer(verifier_answer) == normalize_numeric_answer(result)
+
 
     checks.append({
         "check_name": "independent_resolve",
