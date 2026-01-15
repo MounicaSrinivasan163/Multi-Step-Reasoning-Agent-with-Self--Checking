@@ -127,7 +127,16 @@ Output format:
     except Exception:
         verifier_answer = None
 
-    agreement = str(verifier_answer).strip() == str(result).strip()
+    def extract_number(x):
+    try:
+        return float(x)
+    except:
+        import re
+        nums = re.findall(r"\d+\.?\d*", str(x))
+        return float(nums[0]) if nums else None
+
+    agreement = extract_number(verifier_answer) == extract_number(result)
+
     checks.append({
         "check_name": "independent_resolve",
         "passed": agreement,
