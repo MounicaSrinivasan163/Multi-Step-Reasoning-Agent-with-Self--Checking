@@ -129,15 +129,21 @@ Output format:
 
     import re
 
-    def normalize_numeric_answer(x):
-        if x is None:
+    def normalize_numeric_answer(value):
+        if value is None:
             return None
-        if isinstance(x, (int, float)):
-            return float(x)
-        matches = re.findall(r"\d+\.?\d*", str(x))
-        return float(matches[0]) if matches else None
+        if isinstance(value, (int, float)):
+            return float(value)
+    
+        matches = re.findall(r"\d+\.?\d*", str(value))
+        if not matches:
+            return None
+    
+        return float(matches[0])
 
-    agreement = normalize_numeric_answer(verifier_answer) == normalize_numeric_answer(result)
+    agreement = (
+    normalize_numeric_answer(verifier_answer)
+    == normalize_numeric_answer(result) )
 
 
     checks.append({
