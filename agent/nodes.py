@@ -106,19 +106,11 @@ def verifier_node(state: GraphState) -> GraphState:
 
     # 3️⃣ Independent Re-solve (LLM)
     verification_prompt = f"""
-You are an independent verifier.
-Solve the following question from scratch.
-Do NOT use any prior reasoning.
-Return only JSON.
+    {verifier_prompt}
 
 Question:
 {state.question}
 
-Output format:
-{{
-  "final_answer": "...",
-  "confidence": "high | medium | low"
-}}
 """
     try:
         response = llm.invoke(verification_prompt)
