@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 st.title("🧠 Multi-Step Reasoning Agent")
-st.caption("Planner → Executor → Verifier → Final Answer")
+st.caption("Planner → Executor → Verifier → Retry/checker  →  Final Answer")
 
 # -----------------------------
 # User Input
@@ -76,3 +76,4 @@ if run and question.strip():
 
 elif run:
     st.warning("Please enter a question.")
+
